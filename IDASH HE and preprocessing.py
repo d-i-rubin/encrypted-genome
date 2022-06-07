@@ -1,3 +1,4 @@
+import pickle
 import numpy as np
 import pandas as pd
 import seal
@@ -212,3 +213,7 @@ logmodel.classes_.dump('logmodel_classes.dump')
 logmodel.intercept_.dump('logmodel_intercept.dump')
 logmodel.coef_.dump('logmodel_coef.dump')
 batch_diags.dump('batch_diags.dump')
+pickle.dump(test_sketches, open('test_sketches.dump','wb'))
+pickle.dump(sketches, open('sketches.dump','wb'))
+diags.dump('diags.dump')
+data_df.to_pickle('data_df.dump')

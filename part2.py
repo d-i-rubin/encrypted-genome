@@ -1,3 +1,17 @@
+from sklearn.metrics import confusion_matrix
+import pandas as pd
+from seal import *
+import numpy as np
+import pickle
+
+diags = np.load('diags.dump', allow_pickle=True)
+batch_diags = np.load('batch_diags.dump', allow_pickle=True)
+sketches = pickle.load(open('sketches.dump', 'rb'))
+test_sketches = pickle.load(open('test_sketches.dump', 'rb'))
+anchor_indices = pickle.load(open('anchor_indices.dump', 'rb'))
+data_df = pd.read_pickle('data_df.dump')
+test_samples = pd.read_pickle('test_samples.dump')
+
 #DATA OWNER preprocessing
 #Model owner sends data owner sketches of the anchor samples 
 #Data owner computes vector of distances to each of the 12 anchors
@@ -46,23 +60,23 @@ approx = C.Chebyshev.interpolate(lambda x: .5*np.tanh(10*(x-.5))+.5,9,domain=[-3
 
 
 #A plot of approx
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
-x = np.linspace(-3.25,3.25,100)
-ax = plt.plot(x, approx(x))
+#x = np.linspace(-3.25,3.25,100)
+#ax = plt.plot(x, approx(x))
 
-ax = plt.plot(x,np.heaviside(x-.5,.5))
-plt.show()
+#ax = plt.plot(x,np.heaviside(x-.5,.5))
+#plt.show()
 
 
 approx9 = C.Chebyshev.interpolate(
     lambda x: .5*np.tanh(20*(x-.6))+.5,15,domain=[-3,3]).convert(kind=P)
 
-x = np.linspace(-3,3,100)
-ax = plt.plot(x, approx9(x))
+#x = np.linspace(-3,3,100)
+#ax = plt.plot(x, approx9(x))
 
-ax = plt.plot(x,np.heaviside(x-.6,.5))
-plt.show()
+#ax = plt.plot(x,np.heaviside(x-.6,.5))
+#plt.show()
 
 
 # In[40]:
@@ -71,11 +85,11 @@ plt.show()
 approx15 = C.Chebyshev.interpolate(
     lambda x: .5*np.tanh(20*(x-.5))+.5,15,domain=[-3,3]).convert(kind=P)
 
-x = np.linspace(-3,3,100)
-ax = plt.plot(x, approx15(x))
+#x = np.linspace(-3,3,100)
+#ax = plt.plot(x, approx15(x))
 
-ax = plt.plot(x,np.heaviside(x-.5,.5))
-plt.show()
+#ax = plt.plot(x,np.heaviside(x-.5,.5))
+#plt.show()
 
 
 #DATA OWNER
