@@ -124,8 +124,16 @@ def compute_jacc_sim(sketches):
             jacc_sim[i,j] = round(sketches[i].jaccard(sketches[j]),4)
     return jacc_sim
 
-#jacc_sim = compute_jacc_sim(sketches)
-jacc_sim = np.load('jacc_sim.dump', allow_pickle=True)
+jacc_sim = compute_jacc_sim(sketches)
+# XXX - Speed things up for dev work by doing the following instead of
+# re-running the function. Basically you first run it once and then save the
+# data like this:
+#
+# jacc_sim.dump('logmodel_intercept.dump')
+#
+# and then you load it in like this:
+#
+# jacc_sim = np.load('jacc_sim.dump', allow_pickle=True)
 
 def generate_dist_adj(jacc_sim):
     #Turn Jaccard similarities into matrix of distances.
