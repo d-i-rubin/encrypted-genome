@@ -1,6 +1,47 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+description = """
+Step 1: Model Fit
+-----------------
+
+"""
+
+import sys
+import argparse
+
+
+class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter,
+                      argparse.RawDescriptionHelpFormatter):
+    pass
+
+
+def cli(argv):
+    parser = argparse.ArgumentParser(
+        prog=argv[0],
+        description=description,
+        formatter_class=CustomFormatter)
+    parser.add_argument(
+        "--data_file",
+        required=False,
+        type=str,
+        default="Challenge.fa",
+        help="Input challenge file.")
+    parser.add_argument(
+        "--out_dir",
+        required=False,
+        type=str,
+        default="1",
+        help="Directory where results are saved.")
+    args = parser.parse_args(argv[1:])
+    return args
+
+
+args = cli(sys.argv)
+data_file = args.data_file
+out_dir = args.out_dir
+
+
 # In[1]:
 
 
@@ -28,11 +69,11 @@ import os
 import shutil
 
 try:
-    shutil.rmtree('1')
+    shutil.rmtree(f'{out_dir}')
 except FileNotFoundError:
     pass
-os.makedirs('1/public')
-os.makedirs('1/private')
+os.makedirs(f'{out_dir}/public')
+os.makedirs(f'{out_dir}/private')
 
 
 # In[4]:
@@ -40,7 +81,7 @@ os.makedirs('1/private')
 
 #Load 8000 labelled samples, comprising training and test data
 def load_data():
-    with open("Challenge.fa", "r") as f:
+    with open(data_file, "r") as f:
         data = f.readlines()
 
     labels = []
@@ -172,7 +213,7 @@ test_labels
 #Save test labels for Data Owner to access in Step 4.
 #In real situation these would not be accessible to Model Owner.
 
-test_labels.to_pickle('1/public/data_owner_labels')
+test_labels.to_pickle(f'{out_dir}/public/data_owner_labels')
 
 
 # In[14]:
@@ -312,15 +353,15 @@ print(confusion_matrix(y_test,predictions))
 
 #Save model data for Model Owner's use in Step 3
 
-logmodel.classes_.dump('1/private/logmodel_classes.dump')
-logmodel.intercept_.dump('1/private/logmodel_intercept.dump')
-logmodel.coef_.dump('1/private/logmodel_coef.dump')
+logmodel.classes_.dump(f'{out_dir}/private/logmodel_classes.dump')
+logmodel.intercept_.dump(f'{out_dir}/private/logmodel_intercept.dump')
+logmodel.coef_.dump(f'{out_dir}/private/logmodel_coef.dump')
 
 
 #Save test sketches for Data Owner in Step 2
 #In real situation, Data Owner would hold these from the start
 
-pickle.dump(test_sketches, open('1/public/test_sketches.dump','wb'))
+pickle.dump(test_sketches, open(f'{out_dir}/public/test_sketches.dump','wb'))
 
 #Data below isn't used again.
 
@@ -348,5 +389,5 @@ test_sketches
 
 #Save anchor sketches to send to Data Owner in Step 2
 
-pickle.dump(anchor_sketches, open('1/public/anchor_sketches.dump','wb'))
+pickle.dump(anchor_sketches, open(f'{out_dir}/public/anchor_sketches.dump','wb'))
 
