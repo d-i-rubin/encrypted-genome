@@ -1,6 +1,54 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+description = """
+Step 2: Preprocessing
+---------------------
+
+"""
+
+import sys
+import argparse
+
+
+class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter,
+                      argparse.RawDescriptionHelpFormatter):
+    pass
+
+
+def cli(argv):
+    parser = argparse.ArgumentParser(
+        prog=argv[0],
+        description=description,
+        formatter_class=CustomFormatter)
+    parser.add_argument(
+        "--test_sketches_file",
+        required=False,
+        type=str,
+        default="1/public/test_sketches.dump",
+        help="Input test sketches file.")
+    parser.add_argument(
+        "--anchor_sketches_file",
+        required=False,
+        type=str,
+        default="1/public/anchor_sketches.dump",
+        help="Input anchor sketches file.")
+    parser.add_argument(
+        "--out_dir",
+        required=False,
+        type=str,
+        default="2",
+        help="Directory where results are saved.")
+    args = parser.parse_args(argv[1:])
+    return args
+
+
+args = cli(sys.argv)
+test_sketches_file = args.test_sketches_file
+anchor_sketches_file = args.anchor_sketches_file
+out_dir = args.out_dir
+
+
 # In[1]:
 
 
@@ -25,8 +73,8 @@ try:
     shutil.rmtree('2')
 except FileNotFoundError:
     pass
-os.makedirs('2/public')
-os.makedirs('2/private')
+os.makedirs(f'{out_dir}/public')
+os.makedirs(f'{out_dir}/private')
 
 
 # In[3]:
@@ -34,8 +82,8 @@ os.makedirs('2/private')
 
 #Data Owner loads sketches of private data and loads anchor sketches sent by Model Owner
 
-test_sketches = pickle.load(open('1/public/test_sketches.dump', 'rb'))
-anchor_sketches = pickle.load(open('1/public/anchor_sketches.dump', 'rb'))
+test_sketches = pickle.load(open(test_sketches_file, 'rb'))
+anchor_sketches = pickle.load(open(anchor_sketches_file, 'rb'))
 
 
 # In[4]:
@@ -131,17 +179,17 @@ for i in range(3):
 #including parameters, public key, galois keys, and relinearization keys
 #This data is sent to the Model Owner for Step 3.
 
-ct_data[0].save('2/public/ct_0')
-ct_data[1].save('2/public/ct_1')
-ct_data[2].save('2/public/ct_2')
+ct_data[0].save(f'{out_dir}/public/ct_0')
+ct_data[1].save(f'{out_dir}/public/ct_1')
+ct_data[2].save(f'{out_dir}/public/ct_2')
 
 
 
-parms.save('2/public/IDASH_parms')
-public_key.save('2/public/IDASH_pubkey')
-galois_keys.save('2/public/IDASH_galkeys')
-relin_keys.save('2/public/IDASH_relinkeys')
-pickle.dump(scale, open('2/public/IDASH_scale','wb'))
+parms.save(f'{out_dir}/public/IDASH_parms')
+public_key.save(f'{out_dir}/public/IDASH_pubkey')
+galois_keys.save(f'{out_dir}/public/IDASH_galkeys')
+relin_keys.save(f'{out_dir}/public/IDASH_relinkeys')
+pickle.dump(scale, open(f'{out_dir}/public/IDASH_scale','wb'))
 
 
 # In[9]:
@@ -149,5 +197,5 @@ pickle.dump(scale, open('2/public/IDASH_scale','wb'))
 
 #Data Owner saves secret key for Step 4
 
-secret_key.save('2/private/IDASH_secretkey')
+secret_key.save(f'{out_dir}/private/IDASH_secretkey')
 
