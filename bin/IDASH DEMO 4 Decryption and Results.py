@@ -1,6 +1,75 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+description = """
+Step 4: Decryption and Results
+------------------------------
+
+"""
+
+import sys
+import argparse
+
+
+class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter,
+                      argparse.RawDescriptionHelpFormatter):
+    pass
+
+
+def cli(argv):
+    parser = argparse.ArgumentParser(
+        prog=argv[0],
+        description=description,
+        formatter_class=CustomFormatter)
+    parser.add_argument(
+        "--data_owner_labels_file",
+        required=False,
+        type=str,
+        default='1/public/data_owner_labels',
+        help="Input data owners label file.")
+    parser.add_argument(
+        "--parms_file",
+        required=False,
+        type=str,
+        default="2/public/IDASH_parms",
+        help="Input parms file.")
+    parser.add_argument(
+        "--public_key_file",
+        required=False,
+        type=str,
+        default="2/public/IDASH_pubkey",
+        help="Input public key file.")
+    parser.add_argument(
+        "--secret_key_file",
+        required=False,
+        type=str,
+        default='2/private/IDASH_secretkey',
+        help="Input public key file.")
+    parser.add_argument(
+        "--ct_results_files",
+        required=False,
+        type=str,
+        default='3/public/IDASH_ct_results_%s',
+        help="Input ct results files.")
+    parser.add_argument(
+        "--scale_file",
+        required=False,
+        type=str,
+        default="2/public/IDASH_scale",
+        help="Input scale file.")
+    args = parser.parse_args(argv[1:])
+    return args
+
+
+args = cli(sys.argv)
+data_owner_labels_file = args.data_owner_labels_file
+parms_file = args.parms_file
+public_key_file = args.public_key_file
+secret_key_file = args.secret_key_file
+ct_results_files = args.ct_results_files
+scale_file = args.scale_file
+
+
 # In[1]:
 
 
@@ -20,7 +89,7 @@ import pickle
 #Data owner reloads encryption context
 
 parms = EncryptionParameters(scheme_type.ckks)
-parms.load('2/public/IDASH_parms')
+parms.load(parms_file)
 
 context = SEALContext(parms)
 ckks_encoder = CKKSEncoder(context)
@@ -31,12 +100,12 @@ ckks_encoder = CKKSEncoder(context)
 
 keygen = KeyGenerator(context)
 secret_key = keygen.secret_key()
-secret_key.load(context, '2/private/IDASH_secretkey')
+secret_key.load(context, secret_key_file)
 
 public_key = keygen.create_public_key()
-public_key.load(context, '2/public/IDASH_pubkey')
+public_key.load(context, public_key_file)
 
-scale = pickle.load(open('2/public/IDASH_scale','rb'))
+scale = pickle.load(open(scale_file,'rb'))
 
 
 # In[4]:
@@ -55,7 +124,7 @@ results = []
 for i in range(3):
     pt_init = ckks_encoder.encode(0.,scale)
     ct_init = encryptor.encrypt(pt_init)
-    ct_init.load(context, '3/public/IDASH_ct_results_%s' % i)
+    ct_init.load(context, ct_results_files % i)
     results.append(ct_init)
 
 
@@ -114,7 +183,7 @@ from sklearn.metrics import classification_report,confusion_matrix
 # In[11]:
 
 
-test_labels = pd.read_pickle('1/public/data_owner_labels')
+test_labels = pd.read_pickle(data_owner_labels_file)
 
 
 # In[12]:
