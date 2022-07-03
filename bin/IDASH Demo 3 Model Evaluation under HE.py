@@ -1,6 +1,82 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+description = """
+Step 3: Model Evaluation
+------------------------
+
+"""
+
+import sys
+import argparse
+
+
+class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter,
+                      argparse.RawDescriptionHelpFormatter):
+    pass
+
+
+def cli(argv):
+    parser = argparse.ArgumentParser(
+        prog=argv[0],
+        description=description,
+        formatter_class=CustomFormatter)
+    parser.add_argument(
+        "--model_coef_file",
+        required=False,
+        type=str,
+        default="1/private/logmodel_coef.dump",
+        help="Input model coef file.")
+    parser.add_argument(
+        "--parms_file",
+        required=False,
+        type=str,
+        default="2/public/IDASH_parms",
+        help="Input parms file.")
+    parser.add_argument(
+        "--public_key_file",
+        required=False,
+        type=str,
+        default="2/public/IDASH_pubkey",
+        help="Input public key file.")
+    parser.add_argument(
+        "--galois_keys_file",
+        required=False,
+        type=str,
+        default="2/public/IDASH_galkeys",
+        help="Input galois keys file.")
+    parser.add_argument(
+        "--relin_keys_file",
+        required=False,
+        type=str,
+        default="2/public/IDASH_relinkeys",
+        help="Input relin keys file.")
+    parser.add_argument(
+        "--scale_file",
+        required=False,
+        type=str,
+        default="2/public/IDASH_scale",
+        help="Input scale file.")
+    parser.add_argument(
+        "--out_dir",
+        required=False,
+        type=str,
+        default="3",
+        help="Directory where results are saved.")
+    args = parser.parse_args(argv[1:])
+    return args
+
+
+args = cli(sys.argv)
+model_coef_file = args.model_coef_file
+parms_file = args.parms_file
+public_key_file = args.public_key_file
+galois_keys_file = args.galois_keys_file
+relin_keys_file = args.relin_keys_file
+scale_file = args.scale_file
+out_dir = args.out_dir
+
+
 # In[1]:
 
 
@@ -24,14 +100,14 @@ try:
     shutil.rmtree('3')
 except FileNotFoundError:
     pass
-os.makedirs('3/public')
-os.makedirs('3/private')
+os.makedirs(f'{out_dir}/public')
+os.makedirs(f'{out_dir}/private')
 
 
 # In[3]:
 
 
-model_coef = np.load('1/private/logmodel_coef.dump', allow_pickle=True)
+model_coef = np.load(model_coef_file, allow_pickle=True)
 
 
 # In[4]:
@@ -103,7 +179,7 @@ parms = EncryptionParameters(scheme_type.ckks)
 
 #Model owner loads data owner's parameters
 
-parms.load('2/public/IDASH_parms')
+parms.load(parms_file)
 
 
 # In[10]:
@@ -130,17 +206,17 @@ slot_count = ckks_encoder.slot_count()
 
 keygen = KeyGenerator(context)
 public_key = keygen.create_public_key()
-public_key.load(context, '2/public/IDASH_pubkey')
+public_key.load(context, public_key_file)
 
 
 galois_keys = keygen.create_galois_keys()
-galois_keys.load(context, '2/public/IDASH_galkeys')
+galois_keys.load(context, galois_keys_file)
 
 
 relin_keys = keygen.create_relin_keys()
-relin_keys.load(context, '2/public/IDASH_relinkeys')
+relin_keys.load(context, relin_keys_file)
 
-scale = pickle.load(open('2/public/IDASH_scale','rb'))
+scale = pickle.load(open(scale_file,'rb'))
 
 
 # In[13]:
@@ -356,5 +432,5 @@ for i in range(3):
 #Save results to send to Data Owner in Step 4
 
 for i in range(3):
-    final[i].save('3/public/IDASH_ct_results_%s' % i)
+    final[i].save(f'{out_dir}/public/IDASH_ct_results_%s' % i)
 
