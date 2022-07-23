@@ -22,11 +22,11 @@ def cli(argv):
         description=description,
         formatter_class=CustomFormatter)
     parser.add_argument(
-        "--data_owner_labels_file",
+        "--test_data_file",
         required=False,
         type=str,
-        default='1/public/data_owner_labels',
-        help="Input data owners label file.")
+        default="1/public/test_data",
+        help="Input test data.")
     parser.add_argument(
         "--parms_file",
         required=False,
@@ -62,7 +62,7 @@ def cli(argv):
 
 
 args = cli(sys.argv)
-data_owner_labels_file = args.data_owner_labels_file
+test_data_file = args.test_data_file
 parms_file = args.parms_file
 public_key_file = args.public_key_file
 secret_key_file = args.secret_key_file
@@ -183,7 +183,54 @@ from sklearn.metrics import classification_report,confusion_matrix
 # In[11]:
 
 
-test_labels = pd.read_pickle(data_owner_labels_file)
+def load_data():
+    with open(test_data_file, "r") as f:
+        data = f.readlines()
+
+    labels = []
+    sequences = []
+    lengths = []
+    for k in range(len(data)):
+        if k % 2 == 0:
+            labels.append(data[k])
+        else:
+            seq = data[k].strip()
+            lengths.append(len(seq))
+            sequences.append(seq)
+
+    # uniformize lengths by filling in with N's
+    #max_length = max(lengths)
+    #for i in range(len(sequences)):
+        #padding_size = max_length - len(sequences[i])
+        #for j in range(padding_size):
+            #sequences[i] += "N"
+
+
+    types = [">B.1.526", ">B.1.1.7", ">B.1.427", ">P.1"]
+
+    dataframe = []
+
+    for i in range(len(labels)):
+        entry = []
+        # 2021/08/02: re-replaced use of match-case (Python 3.10) for backwards compatibility
+        for j in range(len(types)):
+            if labels[i].startswith(types[j]):
+                entry.append(j)
+                virus_number = labels[i].split("_")[1].strip()
+                entry.append(virus_number)
+                entry.append(sequences[i])
+                break
+
+            if j == 3:
+                raise "Bad entry"
+
+        dataframe.append(entry)
+
+    return dataframe
+
+data = load_data()
+data_df = pd.DataFrame(data)
+test_labels = data_df[:][0]
 
 
 # In[12]:

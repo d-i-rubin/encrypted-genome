@@ -22,11 +22,11 @@ def cli(argv):
         description=description,
         formatter_class=CustomFormatter)
     parser.add_argument(
-        "--test_sketches_file",
+        "--test_data_file",
         required=False,
         type=str,
-        default="1/public/test_sketches.dump",
-        help="Input test sketches file.")
+        default="1/public/test_data",
+        help="Input test data.")
     parser.add_argument(
         "--anchor_sketches_file",
         required=False,
@@ -44,7 +44,7 @@ def cli(argv):
 
 
 args = cli(sys.argv)
-test_sketches_file = args.test_sketches_file
+test_data_file = args.test_data_file
 anchor_sketches_file = args.anchor_sketches_file
 out_dir = args.out_dir
 
@@ -54,6 +54,7 @@ out_dir = args.out_dir
 
 #Import necessary libraries
 
+import time
 import numpy as np
 import pandas as pd
 import seal
@@ -82,7 +83,88 @@ os.makedirs(f'{out_dir}/private')
 
 #Data Owner loads sketches of private data and loads anchor sketches sent by Model Owner
 
-test_sketches = pickle.load(open(test_sketches_file, 'rb'))
+def load_data():
+    with open(test_data_file, "r") as f:
+        data = f.readlines()
+
+    labels = []
+    sequences = []
+    lengths = []
+    for k in range(len(data)):
+        if k % 2 == 0:
+            labels.append(data[k])
+        else:
+            seq = data[k].strip()
+            lengths.append(len(seq))
+            sequences.append(seq)
+
+    # uniformize lengths by filling in with N's
+    #max_length = max(lengths)
+    #for i in range(len(sequences)):
+        #padding_size = max_length - len(sequences[i])
+        #for j in range(padding_size):
+            #sequences[i] += "N"
+
+
+    types = [">B.1.526", ">B.1.1.7", ">B.1.427", ">P.1"]
+
+    dataframe = []
+
+    for i in range(len(labels)):
+        entry = []
+        # 2021/08/02: re-replaced use of match-case (Python 3.10) for backwards compatibility
+        for j in range(len(types)):
+            if labels[i].startswith(types[j]):
+                entry.append(j)
+                virus_number = labels[i].split("_")[1].strip()
+                entry.append(virus_number)
+                entry.append(sequences[i])
+                break
+
+            if j == 3:
+                raise "Bad entry"
+
+        dataframe.append(entry)
+
+    return dataframe
+
+data = load_data()
+
+#Key preprocessing step:
+#Replace all non-ACTG characters with an ACTG chosen uniformly at random.
+start = time.time()
+data_Nrand = []
+
+base_dict = {0:'A',1:'C',2:'G',3:'T'}
+
+for i in range(len(data)):
+    string_mod = ''
+    for j in range(len(data[i][2])):
+        if data[i][2][j]=='A' or data[i][2][j]=='C' or data[i][2][j]=='G' or data[i][2][j]=='T':
+            string_mod += data[i][2][j]
+        else:
+            string_mod+= base_dict[np.random.randint(0,4)]
+    data_Nrand.append([data[i][0],data[i][1],string_mod])
+
+end = time.time()
+print(f'Time to Replace unknowns: {(end-start):.3f}s')
+
+#These are the sketch parameters that I settled on. Form sketches of all samples.
+start = time.time()
+sketches = []
+N = 5000
+K = 33
+
+for i in range(len(data_Nrand)):
+    mh = smsh.MinHash(n=N,ksize=K)
+    mh.add_sequence(data_Nrand[i][2])
+    sketches.append(mh)
+
+end = time.time()
+print(f'Time to form sketches: {(end-start):.3f}s')
+
+test_sketches = pd.DataFrame(sketches)
+
 anchor_sketches = pickle.load(open(anchor_sketches_file, 'rb'))
 
 

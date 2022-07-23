@@ -60,6 +60,7 @@ from seal import *
 import sourmash as smsh
 import time
 import matplotlib.pyplot as plt
+import random
 
 
 # In[3]:
@@ -84,10 +85,16 @@ def load_data():
     with open(data_file, "r") as f:
         data = f.readlines()
 
+    test_indices = set(random.sample(range(8000), 1000))
+    test_data = []
+
     labels = []
     sequences = []
     lengths = []
     for k in range(len(data)):
+        if k // 2 in test_indices:
+            test_data.append(data[k])
+            continue
         if k % 2 == 0:
             labels.append(data[k])
         else:
@@ -122,6 +129,10 @@ def load_data():
                 raise "Bad entry"
 
         dataframe.append(entry)
+
+    with open(f'{out_dir}/public/test_data', 'w') as outfile:
+        for line in test_data:
+            outfile.write(line)
 
     return dataframe
 
@@ -184,59 +195,10 @@ end = time.time()
 print(f'Time to form sketches: {(end-start):.3f}s')
 
 
-# In[10]:
-
-
-#Set aside 1000 samples as test set held by data owner.
-s= pd.Series(np.arange(8000))
-test_samples = s.sample(n=1000, random_state = 101)
-test_samples
-
-
 # In[11]:
 
 
 sketches_df = pd.DataFrame(sketches)
-test_sketches = sketches_df.iloc[list(test_samples)]
-
-
-# In[12]:
-
-
-test_labels = labels[list(test_samples)]
-test_labels
-
-
-# In[13]:
-
-
-#Save test labels for Data Owner to access in Step 4.
-#In real situation these would not be accessible to Model Owner.
-
-test_labels.to_pickle(f'{out_dir}/public/data_owner_labels')
-
-
-# In[14]:
-
-
-test_indices = list(test_samples)
-test_indices.sort(reverse=True)
-
-
-# In[15]:
-
-
-#Hold test sketches aside from training set.
-for i in range(len(test_indices)):
-    sketches.pop(test_indices[i])
-
-
-# In[16]:
-
-
-#Remove test labels
-for i in range(len(test_indices)):
-    labels.pop(test_indices[i])
 
 
 # In[17]:
@@ -361,7 +323,7 @@ logmodel.coef_.dump(f'{out_dir}/private/logmodel_coef.dump')
 #Save test sketches for Data Owner in Step 2
 #In real situation, Data Owner would hold these from the start
 
-pickle.dump(test_sketches, open(f'{out_dir}/public/test_sketches.dump','wb'))
+#pickle.dump(test_sketches, open(f'{out_dir}/public/test_sketches.dump','wb'))
 
 #Data below isn't used again.
 
@@ -381,7 +343,7 @@ anchor_sketches
 # In[32]:
 
 
-test_sketches
+#test_sketches
 
 
 # In[33]:
