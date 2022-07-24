@@ -261,6 +261,7 @@ for i in range(3):
 #including parameters, public key, galois keys, and relinearization keys
 #This data is sent to the Model Owner for Step 3.
 
+
 ct_data[0].save(f'{out_dir}/public/ct_0')
 ct_data[1].save(f'{out_dir}/public/ct_1')
 ct_data[2].save(f'{out_dir}/public/ct_2')
@@ -281,3 +282,43 @@ pickle.dump(scale, open(f'{out_dir}/public/IDASH_scale','wb'))
 
 secret_key.save(f'{out_dir}/private/IDASH_secretkey')
 
+
+import io
+import tempfile
+import base64
+import json
+
+data = {}
+
+for i in range(3):
+    with tempfile.NamedTemporaryFile() as outfile:
+        ct_data[i].save(outfile.name)
+        with open(outfile.name, 'rb') as infile:
+            data[f"ct_{i}"] = base64.b64encode(infile.read()).decode('utf8')
+
+with tempfile.NamedTemporaryFile() as outfile:
+    parms.save(outfile.name)
+    with open(outfile.name, 'rb') as infile:
+        data[f"IDASH_parms"] = base64.b64encode(infile.read()).decode('utf8')
+
+with tempfile.NamedTemporaryFile() as outfile:
+    public_key.save(outfile.name)
+    with open(outfile.name, 'rb') as infile:
+        data[f"IDASH_pubkey"] = base64.b64encode(infile.read()).decode('utf8')
+
+with tempfile.NamedTemporaryFile() as outfile:
+    galois_keys.save(outfile.name)
+    with open(outfile.name, 'rb') as infile:
+        data[f"IDASH_galkeys"] = base64.b64encode(infile.read()).decode('utf8')
+
+with tempfile.NamedTemporaryFile() as outfile:
+    relin_keys.save(outfile.name)
+    with open(outfile.name, 'rb') as infile:
+        data[f"IDASH_relinkeys"] = base64.b64encode(infile.read()).decode('utf8')
+
+buf = io.BytesIO()
+pickle.dump(scale, buf)
+data[f"IDASH_scale"] = base64.b64encode(buf.getvalue()).decode('utf8')
+
+with open(f'{out_dir}/public/payload', 'w') as outfile:
+    outfile.write(json.dumps(data, indent=4))
