@@ -28,17 +28,11 @@ def cli(argv):
         default="1/public/test_data",
         help="Input test data.")
     parser.add_argument(
-        "--parms_file",
+        "--payload_file",
         required=False,
         type=str,
-        default="2/public/IDASH_parms",
-        help="Input parms file.")
-    parser.add_argument(
-        "--public_key_file",
-        required=False,
-        type=str,
-        default="2/public/IDASH_pubkey",
-        help="Input public key file.")
+        default="2/public/payload",
+        help="Input payload file.")
     parser.add_argument(
         "--secret_key_file",
         required=False,
@@ -51,23 +45,43 @@ def cli(argv):
         type=str,
         default='3/public/IDASH_ct_results_%s',
         help="Input ct results files.")
-    parser.add_argument(
-        "--scale_file",
-        required=False,
-        type=str,
-        default="2/public/IDASH_scale",
-        help="Input scale file.")
     args = parser.parse_args(argv[1:])
     return args
 
 
 args = cli(sys.argv)
 test_data_file = args.test_data_file
-parms_file = args.parms_file
-public_key_file = args.public_key_file
+payload_file = args.payload_file
 secret_key_file = args.secret_key_file
 ct_results_files = args.ct_results_files
-scale_file = args.scale_file
+
+import json
+import tempfile
+import base64
+from seal import *
+import pickle
+
+
+with open(payload_file) as infile:
+    payload = json.loads(infile.read())
+
+parms = EncryptionParameters(scheme_type.ckks)
+with tempfile.NamedTemporaryFile() as named_outfile:
+    with open(named_outfile.name, 'wb') as outfile:
+        outfile.write(base64.b64decode(payload[f"IDASH_parms"].encode('utf8')))
+    parms.load(named_outfile.name)
+
+context = SEALContext(parms)
+
+keygen = KeyGenerator(context)
+
+public_key = keygen.create_public_key()
+with tempfile.NamedTemporaryFile() as named_outfile:
+    with open(named_outfile.name, 'wb') as outfile:
+        outfile.write(base64.b64decode(payload[f"IDASH_pubkey"].encode('utf8')))
+    public_key.load(context, named_outfile.name)
+
+scale = pickle.loads(base64.b64decode(payload[f"IDASH_scale"].encode('utf8')))
 
 
 # In[1]:
@@ -88,10 +102,6 @@ import pickle
 
 #Data owner reloads encryption context
 
-parms = EncryptionParameters(scheme_type.ckks)
-parms.load(parms_file)
-
-context = SEALContext(parms)
 ckks_encoder = CKKSEncoder(context)
 
 
@@ -101,11 +111,6 @@ ckks_encoder = CKKSEncoder(context)
 keygen = KeyGenerator(context)
 secret_key = keygen.secret_key()
 secret_key.load(context, secret_key_file)
-
-public_key = keygen.create_public_key()
-public_key.load(context, public_key_file)
-
-scale = pickle.load(open(scale_file,'rb'))
 
 
 # In[4]:
