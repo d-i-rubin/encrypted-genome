@@ -267,14 +267,6 @@ ct_data[1].save(f'{out_dir}/public/ct_1')
 ct_data[2].save(f'{out_dir}/public/ct_2')
 
 
-
-parms.save(f'{out_dir}/public/IDASH_parms')
-public_key.save(f'{out_dir}/public/IDASH_pubkey')
-galois_keys.save(f'{out_dir}/public/IDASH_galkeys')
-relin_keys.save(f'{out_dir}/public/IDASH_relinkeys')
-pickle.dump(scale, open(f'{out_dir}/public/IDASH_scale','wb'))
-
-
 # In[9]:
 
 
@@ -283,7 +275,6 @@ pickle.dump(scale, open(f'{out_dir}/public/IDASH_scale','wb'))
 secret_key.save(f'{out_dir}/private/IDASH_secretkey')
 
 
-import io
 import tempfile
 import base64
 import json
@@ -316,9 +307,7 @@ with tempfile.NamedTemporaryFile() as outfile:
     with open(outfile.name, 'rb') as infile:
         data[f"IDASH_relinkeys"] = base64.b64encode(infile.read()).decode('utf8')
 
-buf = io.BytesIO()
-pickle.dump(scale, buf)
-data[f"IDASH_scale"] = base64.b64encode(buf.getvalue()).decode('utf8')
+data[f"IDASH_scale"] = base64.b64encode(pickle.dumps(scale)).decode('utf8')
 
 with open(f'{out_dir}/public/payload', 'w') as outfile:
     outfile.write(json.dumps(data, indent=4))

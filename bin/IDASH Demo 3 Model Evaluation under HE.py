@@ -28,35 +28,11 @@ def cli(argv):
         default="1/private/logmodel_coef.dump",
         help="Input model coef file.")
     parser.add_argument(
-        "--parms_file",
+        "--payload_file",
         required=False,
         type=str,
-        default="2/public/IDASH_parms",
-        help="Input parms file.")
-    parser.add_argument(
-        "--public_key_file",
-        required=False,
-        type=str,
-        default="2/public/IDASH_pubkey",
-        help="Input public key file.")
-    parser.add_argument(
-        "--galois_keys_file",
-        required=False,
-        type=str,
-        default="2/public/IDASH_galkeys",
-        help="Input galois keys file.")
-    parser.add_argument(
-        "--relin_keys_file",
-        required=False,
-        type=str,
-        default="2/public/IDASH_relinkeys",
-        help="Input relin keys file.")
-    parser.add_argument(
-        "--scale_file",
-        required=False,
-        type=str,
-        default="2/public/IDASH_scale",
-        help="Input scale file.")
+        default="2/public/payload",
+        help="Input payload file.")
     parser.add_argument(
         "--out_dir",
         required=False,
@@ -69,11 +45,7 @@ def cli(argv):
 
 args = cli(sys.argv)
 model_coef_file = args.model_coef_file
-parms_file = args.parms_file
-public_key_file = args.public_key_file
-galois_keys_file = args.galois_keys_file
-relin_keys_file = args.relin_keys_file
-scale_file = args.scale_file
+payload_file = args.payload_file
 out_dir = args.out_dir
 
 
@@ -89,25 +61,50 @@ from seal import *
 import time
 import pickle
 
+import json
+import tempfile
+import base64
+
+
+with open(payload_file) as infile:
+    payload = json.loads(infile.read())
 
 model_coef = np.load(model_coef_file, allow_pickle=True)
 
 parms = EncryptionParameters(scheme_type.ckks)
-parms.load(parms_file)
+with tempfile.NamedTemporaryFile() as named_outfile:
+    with open(named_outfile.name, 'wb') as outfile:
+        outfile.write(base64.b64decode(payload[f"IDASH_parms"].encode('utf8')))
+    parms.load(named_outfile.name)
 
 context = SEALContext(parms)
 
 keygen = KeyGenerator(context)
+
 public_key = keygen.create_public_key()
-public_key.load(context, public_key_file)
+with tempfile.NamedTemporaryFile() as named_outfile:
+    with open(named_outfile.name, 'wb') as outfile:
+        outfile.write(base64.b64decode(payload[f"IDASH_pubkey"].encode('utf8')))
+    public_key.load(context, named_outfile.name)
 
 galois_keys = keygen.create_galois_keys()
-galois_keys.load(context, galois_keys_file)
+with tempfile.NamedTemporaryFile() as named_outfile:
+    with open(named_outfile.name, 'wb') as outfile:
+        outfile.write(base64.b64decode(payload[f"IDASH_galkeys"].encode('utf8')))
+    galois_keys.load(context, named_outfile.name)
 
 relin_keys = keygen.create_relin_keys()
-relin_keys.load(context, relin_keys_file)
+with tempfile.NamedTemporaryFile() as named_outfile:
+    with open(named_outfile.name, 'wb') as outfile:
+        outfile.write(base64.b64decode(payload[f"IDASH_relinkeys"].encode('utf8')))
+    relin_keys.load(context, named_outfile.name)
 
-scale = pickle.load(open(scale_file,'rb'))
+with tempfile.NamedTemporaryFile() as named_outfile:
+    with open(named_outfile.name, 'wb') as outfile:
+        outfile.write(base64.b64decode(payload[f"IDASH_relinkeys"].encode('utf8')))
+    relin_keys.load(context, named_outfile.name)
+
+scale = pickle.loads(base64.b64decode(payload[f"IDASH_scale"].encode('utf8')))
 
 
 # In[2]:
