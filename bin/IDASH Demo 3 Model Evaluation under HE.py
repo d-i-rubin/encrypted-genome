@@ -90,6 +90,26 @@ import time
 import pickle
 
 
+model_coef = np.load(model_coef_file, allow_pickle=True)
+
+parms = EncryptionParameters(scheme_type.ckks)
+parms.load(parms_file)
+
+context = SEALContext(parms)
+
+keygen = KeyGenerator(context)
+public_key = keygen.create_public_key()
+public_key.load(context, public_key_file)
+
+galois_keys = keygen.create_galois_keys()
+galois_keys.load(context, galois_keys_file)
+
+relin_keys = keygen.create_relin_keys()
+relin_keys.load(context, relin_keys_file)
+
+scale = pickle.load(open(scale_file,'rb'))
+
+
 # In[2]:
 
 
@@ -107,7 +127,6 @@ os.makedirs(f'{out_dir}/private')
 # In[3]:
 
 
-model_coef = np.load(model_coef_file, allow_pickle=True)
 
 
 # In[4]:
@@ -166,30 +185,6 @@ from numpy.polynomial import Polynomial as P
 approx = C.Chebyshev.interpolate(lambda x: .5*np.tanh(10*(x-.5))+.5,9,domain=[-3,3]).convert(kind=P)
 
 
-# In[8]:
-
-
-#Model Owner initializes an encryption scheme
-
-parms = EncryptionParameters(scheme_type.ckks)
-
-
-# In[9]:
-
-
-#Model owner loads data owner's parameters
-
-parms.load(parms_file)
-
-
-# In[10]:
-
-
-#MO initializes context with DO's parms
-
-context = SEALContext(parms)
-
-
 # In[11]:
 
 
@@ -197,26 +192,6 @@ context = SEALContext(parms)
 
 ckks_encoder = CKKSEncoder(context)
 slot_count = ckks_encoder.slot_count()
-
-
-# In[12]:
-
-
-#MO initializes and loads keys and scale
-
-keygen = KeyGenerator(context)
-public_key = keygen.create_public_key()
-public_key.load(context, public_key_file)
-
-
-galois_keys = keygen.create_galois_keys()
-galois_keys.load(context, galois_keys_file)
-
-
-relin_keys = keygen.create_relin_keys()
-relin_keys.load(context, relin_keys_file)
-
-scale = pickle.load(open(scale_file,'rb'))
 
 
 # In[13]:
