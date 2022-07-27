@@ -2,8 +2,8 @@
 # coding: utf-8
 
 description = """
-Step 4: Decryption and Results
-------------------------------
+Client Receive Response
+-----------------------
 
 """
 
@@ -25,25 +25,25 @@ def cli(argv):
         "--test_data_file",
         required=False,
         type=str,
-        default="1/public/test_data",
+        default="data/public/test_data",
         help="Input test data.")
     parser.add_argument(
         "--payload_file",
         required=False,
         type=str,
-        default="2/public/payload",
+        default="client_request/public/payload",
         help="Input payload file.")
     parser.add_argument(
         "--response_payload_file",
         required=False,
         type=str,
-        default="3/public/payload",
+        default="server_response/public/payload",
         help="Reponse payload file.")
     parser.add_argument(
         "--secret_key_file",
         required=False,
         type=str,
-        default='2/private/IDASH_secretkey',
+        default='client_request/private/IDASH_secretkey',
         help="Input public key file.")
     args = parser.parse_args(argv[1:])
     return args

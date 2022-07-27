@@ -2,8 +2,8 @@
 # coding: utf-8
 
 description = """
-Step 2: Preprocessing
----------------------
+Client Make Request
+-------------------
 
 """
 
@@ -25,19 +25,19 @@ def cli(argv):
         "--test_data_file",
         required=False,
         type=str,
-        default="1/public/test_data",
+        default="data/public/test_data",
         help="Input test data.")
     parser.add_argument(
         "--anchor_sketches_file",
         required=False,
         type=str,
-        default="1/public/anchor_sketches.dump",
+        default="data/public/anchor_sketches.dump",
         help="Input anchor sketches file.")
     parser.add_argument(
         "--out_dir",
         required=False,
         type=str,
-        default="2",
+        default="client_request",
         help="Directory where results are saved.")
     args = parser.parse_args(argv[1:])
     return args
@@ -71,7 +71,7 @@ import os
 import shutil
 
 try:
-    shutil.rmtree('2')
+    shutil.rmtree(f'{out_dir}')
 except FileNotFoundError:
     pass
 os.makedirs(f'{out_dir}/public')

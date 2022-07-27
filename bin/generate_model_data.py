@@ -2,8 +2,8 @@
 # coding: utf-8
 
 description = """
-Step 1: Model Fit
------------------
+Generate Model Data
+-------------------
 
 """
 
@@ -31,7 +31,7 @@ def cli(argv):
         "--out_dir",
         required=False,
         type=str,
-        default="1",
+        default="data",
         help="Directory where results are saved.")
     args = parser.parse_args(argv[1:])
     return args

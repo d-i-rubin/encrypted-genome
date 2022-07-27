@@ -2,8 +2,8 @@
 # coding: utf-8
 
 description = """
-Step 3: Model Evaluation
-------------------------
+Server Make Response
+--------------------
 
 """
 
@@ -25,19 +25,19 @@ def cli(argv):
         "--model_coef_file",
         required=False,
         type=str,
-        default="1/private/logmodel_coef.dump",
+        default="data/private/logmodel_coef.dump",
         help="Input model coef file.")
     parser.add_argument(
         "--payload_file",
         required=False,
         type=str,
-        default="2/public/payload",
+        default="client_request/public/payload",
         help="Input payload file.")
     parser.add_argument(
         "--out_dir",
         required=False,
         type=str,
-        default="3",
+        default="server_response",
         help="Directory where results are saved.")
     args = parser.parse_args(argv[1:])
     return args
@@ -127,7 +127,7 @@ import os
 import shutil
 
 try:
-    shutil.rmtree('3')
+    shutil.rmtree(f'{out_dir}')
 except FileNotFoundError:
     pass
 os.makedirs(f'{out_dir}/public')
