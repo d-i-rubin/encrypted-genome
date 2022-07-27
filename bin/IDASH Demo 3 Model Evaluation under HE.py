@@ -392,7 +392,17 @@ for i in range(3):
 
 
 #Save results to send to Data Owner in Step 4
+import tempfile
+import base64
+import json
+
+data = {}
 
 for i in range(3):
-    final[i].save(f'{out_dir}/public/IDASH_ct_results_%s' % i)
+    with tempfile.NamedTemporaryFile() as outfile:
+        final[i].save(outfile.name)
+        with open(outfile.name, 'rb') as infile:
+            data[f"IDASH_ct_results_{i}"] = base64.b64encode(infile.read()).decode('utf8')
 
+with open(f'{out_dir}/public/payload', 'w') as outfile:
+    outfile.write(json.dumps(data, indent=4))

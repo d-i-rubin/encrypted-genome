@@ -34,17 +34,17 @@ def cli(argv):
         default="2/public/payload",
         help="Input payload file.")
     parser.add_argument(
+        "--response_payload_file",
+        required=False,
+        type=str,
+        default="3/public/payload",
+        help="Reponse payload file.")
+    parser.add_argument(
         "--secret_key_file",
         required=False,
         type=str,
         default='2/private/IDASH_secretkey',
         help="Input public key file.")
-    parser.add_argument(
-        "--ct_results_files",
-        required=False,
-        type=str,
-        default='3/public/IDASH_ct_results_%s',
-        help="Input ct results files.")
     args = parser.parse_args(argv[1:])
     return args
 
@@ -52,8 +52,8 @@ def cli(argv):
 args = cli(sys.argv)
 test_data_file = args.test_data_file
 payload_file = args.payload_file
+response_payload_file = args.response_payload_file
 secret_key_file = args.secret_key_file
-ct_results_files = args.ct_results_files
 
 import json
 import tempfile
@@ -125,12 +125,24 @@ evaluator = Evaluator(context)
 
 #Initialize and load ciphertexts from Model Owner, Step 3
 
+
+import json
+import tempfile
+import base64
+
+
+with open(response_payload_file) as infile:
+    payload = json.loads(infile.read())
+
 results = []
 for i in range(3):
     pt_init = ckks_encoder.encode(0.,scale)
     ct_init = encryptor.encrypt(pt_init)
-    ct_init.load(context, ct_results_files % i)
-    results.append(ct_init)
+    with tempfile.NamedTemporaryFile() as named_outfile:
+        with open(named_outfile.name, 'wb') as outfile:
+            outfile.write(base64.b64decode(payload[f"IDASH_ct_results_{i}"].encode('utf8')))
+        ct_init.load(context, named_outfile.name)
+        results.append(ct_init)
 
 
 # In[6]:
