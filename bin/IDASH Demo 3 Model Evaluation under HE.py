@@ -106,6 +106,19 @@ with tempfile.NamedTemporaryFile() as named_outfile:
 
 scale = pickle.loads(base64.b64decode(payload[f"IDASH_scale"].encode('utf8')))
 
+ckks_encoder = CKKSEncoder(context)
+slot_count = ckks_encoder.slot_count()
+encryptor = Encryptor(context, public_key)
+ct_data = []
+for i in range(3):
+    pt_init = ckks_encoder.encode(0.,scale)
+    ct_init = encryptor.encrypt(pt_init)
+    with tempfile.NamedTemporaryFile() as named_outfile:
+        with open(named_outfile.name, 'wb') as outfile:
+            outfile.write(base64.b64decode(payload[f"ct_{i}"].encode('utf8')))
+        ct_init.load(context, named_outfile.name)
+        ct_data.append(ct_init)
+
 
 # In[2]:
 
@@ -180,15 +193,6 @@ from numpy.polynomial import Polynomial as P
 #to a threshold function at .5 on the interval [-3,3]
 #This has shown the best performance
 approx = C.Chebyshev.interpolate(lambda x: .5*np.tanh(10*(x-.5))+.5,9,domain=[-3,3]).convert(kind=P)
-
-
-# In[11]:
-
-
-#Check the slot count
-
-ckks_encoder = CKKSEncoder(context)
-slot_count = ckks_encoder.slot_count()
 
 
 # In[13]:
@@ -368,21 +372,7 @@ for i in range(0,diags.shape[0]):
 # In[16]:
 
 
-encryptor = Encryptor(context, public_key)
 evaluator = Evaluator(context)
-
-
-# In[17]:
-
-
-#Initialize and load ciphertexts from Data Owner
-
-ct_data = []
-for i in range(3):
-    pt_init = ckks_encoder.encode(0.,scale)
-    ct_init = encryptor.encrypt(pt_init)
-    ct_init.load(context, '2/public/ct_%s' % i)
-    ct_data.append(ct_init)
 
 
 # In[18]:

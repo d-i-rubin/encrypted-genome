@@ -253,20 +253,6 @@ for i in range(3):
     ct_data.append(encryptor.encrypt(pt_data[i]))
 
 
-# In[8]:
-
-
-#DATA OWNER
-#Save to file: ciphertext data and encryption context,
-#including parameters, public key, galois keys, and relinearization keys
-#This data is sent to the Model Owner for Step 3.
-
-
-ct_data[0].save(f'{out_dir}/public/ct_0')
-ct_data[1].save(f'{out_dir}/public/ct_1')
-ct_data[2].save(f'{out_dir}/public/ct_2')
-
-
 # In[9]:
 
 
