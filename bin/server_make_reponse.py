@@ -408,7 +408,7 @@ def root():
                 data[f"IDASH_ct_results_{i}"] = base64.b64encode(infile.read()).decode('utf8')
     with open(f'{out_dir}/public/payload', 'w') as outfile:
         outfile.write(json.dumps(data, indent=4))
-    return Response(response=json.dumps(payload, indent=4), status=200, headers={"Content-Type": "application/json"})
+    return Response(response=json.dumps(data, indent=4), status=200, headers={"Content-Type": "application/json"})
 
 
 if __name__ == '__main__':
