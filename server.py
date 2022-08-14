@@ -33,12 +33,6 @@ def cli(argv):
         type=str,
         default="client_request/public/payload",
         help="Input payload file.")
-    parser.add_argument(
-        "--out_dir",
-        required=False,
-        type=str,
-        default="server_response",
-        help="Directory where results are saved.")
     args = parser.parse_args(argv[1:])
     return args
 
@@ -46,7 +40,6 @@ def cli(argv):
 args = cli(sys.argv)
 model_coef_file = args.model_coef_file
 payload_file = args.payload_file
-out_dir = args.out_dir
 
 
 # In[1]:
@@ -117,25 +110,6 @@ def main(payload):
                 outfile.write(base64.b64decode(payload[f"ct_{i}"].encode('utf8')))
             ct_init.load(context, named_outfile.name)
             ct_data.append(ct_init)
-
-
-    # In[2]:
-
-
-    import os
-    import shutil
-
-    try:
-        shutil.rmtree(f'{out_dir}')
-    except FileNotFoundError:
-        pass
-    os.makedirs(f'{out_dir}/public')
-    os.makedirs(f'{out_dir}/private')
-
-
-    # In[3]:
-
-
 
 
     # In[4]:
@@ -406,8 +380,6 @@ def root():
             final[i].save(outfile.name)
             with open(outfile.name, 'rb') as infile:
                 data[f"IDASH_ct_results_{i}"] = base64.b64encode(infile.read()).decode('utf8')
-    with open(f'{out_dir}/public/payload', 'w') as outfile:
-        outfile.write(json.dumps(data, indent=4))
     return Response(response=json.dumps(data, indent=4), status=200, headers={"Content-Type": "application/json"})
 
 
