@@ -6,3 +6,4 @@ matplotlib
 pysam
 sourmash
 scikit-learn
+flask
