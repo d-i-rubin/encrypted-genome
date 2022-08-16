@@ -7,3 +7,4 @@ pysam
 sourmash
 scikit-learn
 flask
+requests
