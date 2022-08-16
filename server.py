@@ -27,19 +27,12 @@ def cli(argv):
         type=str,
         default="data/private/logmodel_coef.dump",
         help="Input model coef file.")
-    parser.add_argument(
-        "--payload_file",
-        required=False,
-        type=str,
-        default="client_request/public/payload",
-        help="Input payload file.")
     args = parser.parse_args(argv[1:])
     return args
 
 
 args = cli(sys.argv)
 model_coef_file = args.model_coef_file
-payload_file = args.payload_file
 
 
 # In[1]:
