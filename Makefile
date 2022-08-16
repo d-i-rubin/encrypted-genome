@@ -1,8 +1,22 @@
 UID := $(shell id -u)
 GID := $(shell id -g)
 
+build_datagen:
+	docker build -t seal-datagen -f Dockerfile.datagen .
+
+run_datagen:
+	mkdir -p data
+	docker run \
+        --env-file env \
+        --user $(UID):$(GID) \
+        -v $(PWD)/data:/data:rw \
+        -v $(PWD)/Challenge:/Challenge:ro \
+        -it \
+         seal-datagen \
+        /datagen/run_generate_model_data.sh
+
 build_notebook:
-	docker build -t seal-notebook -f Dockerfile .
+	docker build -t seal-notebook -f Dockerfile.notebook .
 
 run_notebook:
 	mkdir -p notebooks data

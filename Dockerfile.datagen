@@ -1,0 +1,13 @@
+FROM seal-python
+
+# define the folder where our src should exist/ be deposited
+ARG SRC=/datagen
+RUN mkdir -p ${SRC}
+
+# copy into container requirements and install them before rest of code
+COPY ./requirements.txt ${SRC}/.
+RUN pip3 install -r ${SRC}/requirements.txt
+
+COPY ./generate_model_data.py ${SRC}/.
+COPY ./run_generate_model_data.sh ${SRC}/.
+RUN chmod +x ${SRC}/run_generate_model_data.sh

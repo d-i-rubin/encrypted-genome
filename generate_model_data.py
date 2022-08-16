@@ -59,7 +59,6 @@ import seal
 from seal import *
 import sourmash as smsh
 import time
-import matplotlib.pyplot as plt
 import random
 
 
@@ -67,14 +66,12 @@ import random
 
 
 import os
-import shutil
 
-try:
-    shutil.rmtree(f'{out_dir}')
-except FileNotFoundError:
-    pass
-os.makedirs(f'{out_dir}/public')
-os.makedirs(f'{out_dir}/private')
+for foldername in ["public", "private"]:
+    try:
+        os.makedirs(f'{out_dir}/{foldername}')
+    except FileExistsError:
+        pass
 
 
 # In[4]:
