@@ -1,1 +1,8 @@
+jupyter
+pandas
+scipy
 numpy
+matplotlib
+pysam
+sourmash
+scikit-learn
