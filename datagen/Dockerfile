@@ -9,5 +9,5 @@ COPY ./requirements.txt ${SRC}/.
 RUN pip3 install -r ${SRC}/requirements.txt
 
 COPY ./generate_model_data.py ${SRC}/.
-COPY ./run_generate_model_data.sh ${SRC}/.
-RUN chmod +x ${SRC}/run_generate_model_data.sh
+
+CMD ["python3", "/datagen/generate_model_data.py", "--data_file", "/Challenge/Challenge.fa", "--out_dir", "/data"]

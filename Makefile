@@ -1,6 +1,10 @@
 UID := $(shell id -u)
 GID := $(shell id -g)
 
+datagen: .PHONY
+	mkdir data
+	UID=$(UID) GID=$(GID) docker compose run l-infinity-datagen
+
 build_server:
 	docker build -t seal-server -f Dockerfile.server .
 
@@ -12,19 +16,6 @@ run_server:
         -p 5000:5000 \
          seal-server \
         /server/run_server.sh
-
-build_datagen:
-	docker build -t seal-datagen -f Dockerfile.datagen .
-
-run_datagen:
-	mkdir -p data
-	docker run \
-        --user $(UID):$(GID) \
-        -v $(PWD)/data:/data:rw \
-        -v $(PWD)/Challenge:/Challenge:ro \
-        -it \
-         seal-datagen \
-        /datagen/run_generate_model_data.sh
 
 build_notebook:
 	docker build -t seal-notebook -f Dockerfile.notebook .
@@ -41,3 +32,5 @@ run_notebook:
         -v $(PWD)/data:/data:rw \
         -p 8888:8888 \
         -it seal-notebook
+
+.PHONY:
