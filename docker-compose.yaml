@@ -18,3 +18,19 @@ services:
     user: "${UID}:${GID}"
     depends_on:
       - seal-python
+  notebook:
+    build: ./notebook
+    volumes:
+      - ./notebook/notebooks:/notebooks:rw
+      - ./data:/data:ro
+    user: "${UID}:${GID}"
+    environment:
+      - JUPYTER_RUNTIME_DIR=/runtime
+      - JUPYTER_DATA_DIR=/runtime
+      - JUPYTER_CONFIG_DIR=/runtime
+      - MPLCONFIGDIR=/runtime
+    ports:
+      - 8888:8888
+    depends_on:
+      - seal-python
+      - server
