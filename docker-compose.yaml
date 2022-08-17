@@ -3,11 +3,18 @@ services:
   seal-python:
     build: ./seal-python
     image: seal-python
-  l-infinity-datagen:
+  datagen:
     build: ./datagen
     volumes:
       - ./data:/data:rw
       - ./Challenge:/Challenge:ro
+    user: "${UID}:${GID}"
+    depends_on:
+      - seal-python
+  server:
+    build: ./server
+    volumes:
+      - ./data:/data:ro
     user: "${UID}:${GID}"
     depends_on:
       - seal-python

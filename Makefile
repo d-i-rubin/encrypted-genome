@@ -3,19 +3,7 @@ GID := $(shell id -g)
 
 datagen: .PHONY
 	mkdir data
-	UID=$(UID) GID=$(GID) docker compose run l-infinity-datagen
-
-build_server:
-	docker build -t seal-server -f Dockerfile.server .
-
-run_server:
-	docker run \
-        --user $(UID):$(GID) \
-        -v $(PWD)/data:/data:ro \
-        --detach \
-        -p 5000:5000 \
-         seal-server \
-        /server/run_server.sh
+	UID=$(UID) GID=$(GID) docker compose run datagen
 
 build_notebook:
 	docker build -t seal-notebook -f Dockerfile.notebook .

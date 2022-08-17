@@ -9,5 +9,5 @@ COPY ./requirements.txt ${SRC}/.
 RUN pip3 install -r ${SRC}/requirements.txt
 
 COPY ./server.py ${SRC}/.
-COPY ./run_server.sh ${SRC}/.
-RUN chmod +x ${SRC}/run_server.sh
+
+CMD ["python3", "/server/server.py", "--model_coef_file", "/data/private/logmodel_coef.dump"]
