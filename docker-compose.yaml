@@ -1,0 +1,5 @@
+version: '3'
+services:
+  seal-python:
+      build: ./seal-python
+      image: seal-python
